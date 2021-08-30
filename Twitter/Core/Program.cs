@@ -22,6 +22,9 @@ namespace Twitter.Core
 
         private static void Main(string[] args)
         {
+            ServicePointManager.Expect100Continue = true;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
             if (!Directory.Exists("files"))
             {
                 Directory.CreateDirectory("files");
@@ -71,29 +74,42 @@ namespace Twitter.Core
                 using (WebClient wc = new WebClient())
                 {
                     wc.Headers.Add("User-Agent", "VRSpeedruns-Discord");
-                    var result = await wc.DownloadStringTaskAsync("https://api.github.com/repos/VRSRBot/test/releases?per_page=10");
-                    dynamic json = JsonConvert.DeserializeObject(result);
-                    var count = 0;
+                    string result = "";
 
-                    FConsole.WriteLine("Performing world record check...");
-
-                    for (var i = json.Count - 1; i >= 0; i--)
+                    try
                     {
-                        if (!WorldRecords.Contains((string)json[i].name))
-                        {
-                            var run = new Run((string)json[i].name);
-                            var success = await SendTweet(run);
-
-                            if (success)
-                            {
-                                count++;
-                                WorldRecords.Add((string)json[i].name);
-                                File.WriteAllText("files/worldrecords.json", JsonConvert.SerializeObject(WorldRecords, Formatting.Indented));
-                            }
-                        }
+                        result = await wc.DownloadStringTaskAsync("https://api.github.com/repos/VRSRBot/test/releases?per_page=10");
+                    }
+                    catch (Exception e)
+                    {
+                        FConsole.WriteLine($"&8- &cERROR: &fError when trying to get latest WRs.\n\n&8-- &7{e.Message}");
                     }
 
-                    FConsole.WriteLine($"Found and posted {count} new world records.");
+                    if (result != "")
+                    {
+                        dynamic json = JsonConvert.DeserializeObject(result);
+                        var count = 0;
+
+                        FConsole.WriteLine("Performing world record check...");
+
+                        for (var i = json.Count - 1; i >= 0; i--)
+                        {
+                            if (!WorldRecords.Contains((string)json[i].name))
+                            {
+                                var run = new Run((string)json[i].name);
+                                var success = await SendTweet(run);
+
+                                if (success)
+                                {
+                                    count++;
+                                    WorldRecords.Add((string)json[i].name);
+                                    File.WriteAllText("files/worldrecords.json", JsonConvert.SerializeObject(WorldRecords, Formatting.Indented));
+                                }
+                            }
+                        }
+
+                        FConsole.WriteLine($"Found and posted {count} new world records.");
+                    }
                 }
 
                 await Task.Delay(600000); //10 min
@@ -112,10 +128,10 @@ namespace Twitter.Core
             }
             catch (Exception e)
             {
-                FConsole.WriteLine($"&cERROR: &fException when posting tweet.\n\n&8- &7{e.Message}");
+                FConsole.WriteLine($"&8- &cERROR: &fException when posting tweet. Record '{run.ID}' skipped.\n\n&8-- &7{e.Message}");
                 return false;
             }
-            FConsole.WriteLine($" - Posted tweet for run '{run.ID}'");
+            FConsole.WriteLine($"&8- &fPosted tweet for record '{run.ID}'");
             return true;
         }
     }
