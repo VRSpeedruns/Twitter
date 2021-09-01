@@ -46,7 +46,7 @@ namespace Twitter.Entities
             {
                 if ((bool)variable["is-subcategory"])
                 {
-                    _subcats.Add((string)variable.name);
+                    _subcats.Add((string)variable.values.values[(string)data.values[(string)variable.id]].label);
                 }
             }
             if (_subcats.Count > 0)
