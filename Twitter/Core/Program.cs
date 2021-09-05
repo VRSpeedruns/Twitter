@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Tweetinvi;
 using Tweetinvi.Core.Models;
+using Tweetinvi.Parameters;
 using Twitter.Entities;
 using Twitter.Util;
 
@@ -85,13 +86,7 @@ namespace Twitter.Core
                             gameCount = (int)gamesJson.Count;
 
                             var user = await Twitter.Users.GetAuthenticatedUserAsync();
-                            var split = user.Description.Split('\n');
-                            var bio = split[0];
-                            for (var i = 1; i < split.Length - 1; i++)
-                            {
-                                bio += Environment.NewLine + split[i];
-                            }
-
+                            var bio = user.Description.Split(new[] { "Currently watching " }, StringSplitOptions.None)[0];
                             bio += $"Currently watching {gameCount} games.";
 
                             var parameters = new UpdateProfileParameters();
