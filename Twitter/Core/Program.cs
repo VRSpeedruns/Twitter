@@ -69,10 +69,44 @@ namespace Twitter.Core
                 }
             }
 
+            var gameCount = -1;
             while (true)
             {
                 using (WebClient wc = new WebClient())
                 {
+                    //get current game count and update twitter bio
+                    try
+                    {
+                        var gamesDownload = await wc.DownloadStringTaskAsync("https://vrspeed.run/vrsrassets/other/games.json");
+                        dynamic gamesJson = JsonConvert.DeserializeObject(gamesDownload);
+
+                        if (gameCount != (int)gamesJson.Count)
+                        {
+                            gameCount = (int)gamesJson.Count;
+
+                            var user = await Twitter.Users.GetAuthenticatedUserAsync();
+                            var split = user.Description.Split('\n');
+                            var bio = split[0];
+                            for (var i = 1; i < split.Length - 1; i++)
+                            {
+                                bio += Environment.NewLine + split[i];
+                            }
+
+                            bio += $"Currently watching {gameCount} games.";
+
+                            var parameters = new UpdateProfileParameters();
+                            parameters.Description = bio;
+
+                            await Twitter.AccountSettings.UpdateProfileAsync(parameters);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        FConsole.WriteLine($"&8- &cERROR: &fError when trying to update bio game count.\n&8-- &7{e.Message}");
+                    }
+
+
+
                     wc.Headers.Add("User-Agent", "VRSpeedruns-Discord");
                     string result = "";
 
@@ -82,7 +116,7 @@ namespace Twitter.Core
                     }
                     catch (Exception e)
                     {
-                        FConsole.WriteLine($"&8- &cERROR: &fError when trying to get latest WRs.\n\n&8-- &7{e.Message}");
+                        FConsole.WriteLine($"&8- &cERROR: &fError when trying to get latest WRs.\n&8-- &7{e.Message}");
                     }
 
                     if (result != "")
@@ -128,7 +162,7 @@ namespace Twitter.Core
             }
             catch (Exception e)
             {
-                FConsole.WriteLine($"&8- &cERROR: &fException when posting tweet. Record '{run.ID}' skipped.\n\n&8-- &7{e.Message}");
+                FConsole.WriteLine($"&8- &cERROR: &fException when posting tweet. Record '{run.ID}' skipped.\n&8-- &7{e.Message}");
                 return false;
             }
             FConsole.WriteLine($"&8- &fPosted tweet for record '{run.ID}'");
