@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Octokit;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -43,7 +44,27 @@ namespace Twitter.Core
                 return;
             }
 
+            if (!File.Exists("files/userpass.txt"))
+            {
+                File.WriteAllText("files/userpass.txt", "");
+            }
+
+            Credentials creds;
+            var credsFile = File.ReadAllLines("files/userpass.txt");
+            if (credsFile.Length > 1)
+            {
+                creds = new Credentials(credsFile[0], credsFile[1]);
+            }
+            else
+            {
+                Console.WriteLine("Please fill out `userpass.txt` with the following:\nGitHub username on line 1\nGitHub password/access token on line 2");
+                Console.ReadLine();
+                return;
+            }
+
             Twitter = new TwitterClient(config.consumerKey, config.consumerSecret, config.accessToken, config.accessTokenSecret);
+
+            Heartbeat.Start(creds);
 
             MainAsync().GetAwaiter().GetResult();
         }
