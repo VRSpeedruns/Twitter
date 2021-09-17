@@ -80,7 +80,7 @@ namespace Twitter.Core
                 using (WebClient wc = new WebClient())
                 {
                     wc.Headers.Add("User-Agent", "VRSpeedruns-Twitter");
-                    var result = await wc.DownloadStringTaskAsync("https://api.github.com/repos/VRSRBot/LatestWorldRecords/releases?per_page=10");
+                    var result = await wc.DownloadStringTaskAsync("https://api.github.com/repos/VRSRBot/LatestWorldRecords/releases?per_page=100");
                     dynamic json = JsonConvert.DeserializeObject(result);
 
                     foreach (dynamic run in json)
@@ -128,7 +128,7 @@ namespace Twitter.Core
 
                     try
                     {
-                        result = await wc.DownloadStringTaskAsync("https://api.github.com/repos/VRSRBot/LatestWorldRecords/releases?per_page=10");
+                        result = await wc.DownloadStringTaskAsync("https://api.github.com/repos/VRSRBot/LatestWorldRecords/releases?per_page=100");
                     }
                     catch (Exception e)
                     {
