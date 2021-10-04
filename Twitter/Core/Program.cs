@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Tweetinvi;
 using Tweetinvi.Core.Models;
+using Tweetinvi.Models;
 using Tweetinvi.Parameters;
 using Twitter.Entities;
 using Twitter.Util;
@@ -17,6 +18,9 @@ namespace Twitter.Core
 {
     class Program
     {
+        public static dynamic VRSRGames;
+        public static dynamic VRSRColors;
+
         private static List<string> WorldRecords = new List<string>();
         private static Config config;
 
@@ -100,11 +104,14 @@ namespace Twitter.Core
                     try
                     {
                         var gamesDownload = await wc.DownloadStringTaskAsync("https://vrspeed.run/vrsrassets/other/games.json");
-                        dynamic gamesJson = JsonConvert.DeserializeObject(gamesDownload);
+                        VRSRGames = JsonConvert.DeserializeObject(gamesDownload);
 
-                        if (gameCount != (int)gamesJson.Count)
+                        var colorsDownload = await wc.DownloadStringTaskAsync("https://vrspeed.run/vrsrassets/other/colors.json");
+                        VRSRColors = JsonConvert.DeserializeObject(colorsDownload);
+
+                        if (gameCount != (int)VRSRGames.Count)
                         {
-                            gameCount = (int)gamesJson.Count;
+                            gameCount = (int)VRSRGames.Count;
 
                             var user = await Twitter.Users.GetAuthenticatedUserAsync();
                             var bio = user.Description.Split(new[] { "Currently watching " }, StringSplitOptions.None)[0];
@@ -155,6 +162,8 @@ namespace Twitter.Core
                                     WorldRecords.Add((string)json[i].name);
                                     File.WriteAllText("files/worldrecords.json", JsonConvert.SerializeObject(WorldRecords, Formatting.Indented));
                                 }
+
+                                await Task.Delay(5000);
                             }
                         }
 
@@ -169,11 +178,22 @@ namespace Twitter.Core
         private static async Task<bool> SendTweet(Run run)
         {
             await run.DownloadData();
+            await run.GenerateImage();
+            
             var info = run.GetInfo();
 
             try
             {
-                await Twitter.Tweets.PublishTweetAsync($"🏆 NEW VR WORLD RECORD! 🏆\n\n{info.game} - {info.category}\n\nRun completed in {info.time} by {info.player}\n\n{info.link}");
+                var image = File.ReadAllBytes("files/img/out.png");
+                var uploaded = await Twitter.Upload.UploadTweetImageAsync(image);
+                
+
+                await Twitter.Tweets.PublishTweetAsync(new PublishTweetParameters
+                {
+                    Text = $"🏆 NEW VR WORLD RECORD! 🏆\n\n{info.game} - {info.category}\n\nRun completed in {info.time} by {info.player}\n\n" +
+                           $"• VRSR: https://vrs.run/{info.runId}\n• SRDC: {info.link}",
+                    Medias = new List<IMedia>() { uploaded }
+                });
 
             }
             catch (Exception e)
