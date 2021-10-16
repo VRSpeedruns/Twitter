@@ -120,7 +120,14 @@ namespace Twitter.Entities
 
             using (WebClient wc = new WebClient())
             {
-                await wc.DownloadFileTaskAsync($"https://www.speedrun.com/gameasset/{data.game.data.id}/cover", "files/img/temp_cover.png");
+                try
+                {
+                    await wc.DownloadFileTaskAsync($"https://www.speedrun.com/gameasset/{data.game.data.id}/cover", "files/img/temp_cover.png");
+                }
+                catch
+                {
+                    await wc.DownloadFileTaskAsync("https://www.speedrun.com/images/blankcover.png", "files/img/temp_cover.png");
+                }
             }
 
             var cover = (Bitmap)Image.FromFile("files/img/temp_cover.png");

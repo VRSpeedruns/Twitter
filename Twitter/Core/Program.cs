@@ -163,7 +163,7 @@ namespace Twitter.Core
                                     File.WriteAllText("files/worldrecords.json", JsonConvert.SerializeObject(WorldRecords, Formatting.Indented));
                                 }
 
-                                await Task.Delay(5000);
+                                await Task.Delay(10000);
                             }
                         }
 
