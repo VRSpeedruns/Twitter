@@ -244,7 +244,20 @@ namespace Twitter.Entities
             template = (Bitmap)RoundCorners(template, 35);
 
             template = DrawBitmapWithBorder(template, ColorTranslator.FromHtml((string)Program.VRSRColors[(string)VRSR.color].color));
-            template.Save("files/img/out.png");
+
+            var saved = false;
+            while (!saved)
+            {
+                try
+                {
+                    template.Save("files/img/out.png");
+                    saved = true;
+                }
+                catch
+                {
+                    await Task.Delay(2500);
+                }
+            }
         }
 
         // https://stackoverflow.com/a/56035786
