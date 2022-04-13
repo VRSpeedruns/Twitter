@@ -1,6 +1,7 @@
 ﻿using Octokit;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -34,18 +35,21 @@ namespace Twitter.Core
                 var time = DateTimeOffset.Now.ToUnixTimeSeconds().ToString();
                 var release = new ReleaseUpdate();
                 release.Body = time;
+                var thisHeartbeat = false;
 
                 FConsole.WriteLine($"&3Sending heartbeat.");
                 try
                 {
                     await client.Repository.Release.Edit("VRSRBot", "Heartbeats", 49565631, release); // 49565631 = twitter's release
+                    thisHeartbeat = true;
                     FConsole.WriteLine($"&3Heartbeat sent.");
                 }
                 catch
                 {
                     FConsole.WriteLine($"&cHeartbeat not sent.");
                 }
-
+                
+                if (thisHeartbeat) File.WriteAllText("files/heartbeat.txt", time);
 
                 await Task.Delay(300000); // 5 minutes
             }
