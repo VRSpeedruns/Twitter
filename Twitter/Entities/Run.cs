@@ -48,7 +48,7 @@ namespace Twitter.Entities
             }
         }
 
-        public (string game, string category, string time, string player, string link, string runId) GetInfo()
+        public (string game, string category, string time, string player, string link, string vrsrLink) GetInfo()
         {
             if (Response == "") return (null, null, null, null, null, null);
 
@@ -93,7 +93,7 @@ namespace Twitter.Entities
                 player = data.players.data[0].name;
             }
 
-            return (game, category + subcats, time, player, data.weblink, (string)data.id);
+            return (game, category + subcats, time, player, data.weblink, $"https://vrspeed.run/{VRSR.abbreviation}/run/{data.id}");
         }
 
         public static async Task<string> SRCAPICall(string url, WebClient wc)
@@ -238,12 +238,6 @@ namespace Twitter.Entities
 
                         str = str.Substring(0, str.Length - 1);
                     }
-                }
-
-                // RUN LINK
-                using (Font font = new Font("Squada One", 50, FontStyle.Bold))
-                {
-                    graphics.DrawString("VRS.RUN/" + data.id, font, Brushes.White, new PointF(1175, 575), new StringFormat(StringFormatFlags.DirectionRightToLeft));
                 }
             }
 

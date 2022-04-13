@@ -191,7 +191,7 @@ namespace Twitter.Core
                 await Twitter.Tweets.PublishTweetAsync(new PublishTweetParameters
                 {
                     Text = $"🏆 NEW VR WORLD RECORD! 🏆\n\n{info.game} - {info.category}\n\nRun completed in {info.time} by {info.player}\n\n" +
-                           $"• VRSR: https://vrs.run/{info.runId}\n• SRDC: {info.link}",
+                           $"• VRSR: {info.vrsrLink}\n• SRDC: {info.link}",
                     Medias = new List<IMedia>() { uploaded }
                 });
 
